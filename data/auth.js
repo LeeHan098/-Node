@@ -1,37 +1,41 @@
-import { db } from '../db/database.js';
+import { sequelize } from '../db/database.js';
+import SQ, { STRING, TEXT } from 'sequelize'
 
-// abcd1234: $2b$12$G9xf8SFq3oTEgdj7ozHQ/uhDOyeQcUEDU8tnOcvpvApuadr3nE5Vm
-// let users = [
-//   {
-//     id: '1',
-//     username: 'bob',
-//     password: '$2b$12$G9xf8SFq3oTEgdj7ozHQ/uhDOyeQcUEDU8tnOcvpvApuadr3nE5Vm',
-//     name: 'Bob',
-//     email: 'bob@gmail.com',
-//     url: 'https://widgetwhats.com/app/uploads/2019/11/free-profile-photo-whatsapp-1.png',
-//   },
-//   {
-//     id: '2',
-//     username: 'ellie',
-//     password: '$2b$12$G9xf8SFq3oTEgdj7ozHQ/uhDOyeQcUEDU8tnOcvpvApuadr3nE5Vm',
-//     name: 'Ellie',
-//     email: 'ellie@gmail.com',
-//   },
-// ];
+const DataTypes = SQ.DataTypes
+export const User = sequelize.define('user', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true
+  },
+  username: {
+    type: DataTypes.STRING(45),
+    allowNull: false
+  },
+  password: {
+    type: STRING(128),
+    allowNull: false
+  },
+  name: {
+    type: STRING(128),
+    allowNull: false
+  },
+  email: {
+    type: STRING(128),
+    allowNull: false
+  },
+  url: DataTypes.TEXT
+}, { timestamps: false })
 
 export async function findByUsername(username) {
-  return db.execute('SELECT * FROM users WHERE username=?', [username])
-    .then((result) => result[0][0] )
+  return User.findOne({ where: { username } })
 }
 
 export async function findById(id) {
-  return db.execute('SELECT * FROM users WHERE id=?', [id])
-  .then((result) => result[0][0] )
+  return User.findByPk(id)
 }
 
 export async function createUser(user) {
-  const { username, password, name, email, url } = user
-  return db.execute('INSERT INTO users (username, password, name, email, url) VALUES(?,?,?,?,?)', [
-    username, password, name, email, url
-  ]).then((result) => { console.log(result[0].insertId); return result })
+  return User.create(user).then(data => { console.log(data.dataValues.id); return data })
 }
